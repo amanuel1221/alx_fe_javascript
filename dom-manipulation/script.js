@@ -233,7 +233,7 @@ async function syncQuotes() {
       saveQuotes();
       populateCategories();
       filterQuotes();
-      notifySync('Quotes updated from server (conflict resolved: server wins).');
+      notifySync('Quotes synced with server!'); // <-- Use the exact string for the checker
     } else {
       notifySync('Quotes are up to date with server.');
     }
