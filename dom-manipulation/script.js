@@ -225,7 +225,7 @@ function notifySync(message) {
 }
 
 // Periodic sync with server
-async function syncWithServer() {
+async function syncQuotes() {
   try {
     const serverQuotes = await fetchQuotesFromServer();
     const updated = resolveConflicts(serverQuotes, quotes);
@@ -249,16 +249,16 @@ function addManualSyncButton() {
     btn.id = 'syncBtn';
     btn.textContent = 'Sync with Server';
     btn.style.margin = '10px';
-    btn.onclick = syncWithServer;
+    btn.onclick = syncQuotes;
     document.body.insertBefore(btn, document.getElementById('exportBtn'));
   }
 }
 
 // Start periodic sync every 30 seconds
-setInterval(syncWithServer, 30000);
+setInterval(syncQuotes, 30000);
 
 // Add manual sync button and do initial sync on load
 window.addEventListener('DOMContentLoaded', function() {
   addManualSyncButton();
-  syncWithServer();
+  syncQuotes();
 });
