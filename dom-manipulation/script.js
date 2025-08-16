@@ -165,3 +165,100 @@ window.addEventListener('DOMContentLoaded', function() {
   document.getElementById('importFile').addEventListener('change', importFromJsonFile);
   document.getElementById('categoryFilter').addEventListener('change', filterQuotes);
 });
+
+// --- Task 4: Server Sync & Conflict Resolution ---
+
+// Simulated server endpoint (replace with your real endpoint if needed)
+const SERVER_URL = 'https://jsonplaceholder.typicode.com/posts'; // For simulation only
+
+// Simulate fetching quotes from server
+async function fetchQuotesFromServer() {
+  // Simulate: fetch quotes as [{text, category}]
+  const response = await fetch(SERVER_URL);
+  const data = await response.json();
+  // We'll simulate quotes as the first 5 posts
+  return data.slice(0, 5).map(post => ({
+    text: post.title,
+    category: 'Server'
+  }));
+}
+
+// Simulate posting quotes to server (no real effect with JSONPlaceholder)
+async function postQuotesToServer(quotesToSync) {
+  await fetch(SERVER_URL, {
+    method: 'POST',
+    body: JSON.stringify(quotesToSync),
+    headers: { 'Content-Type': 'application/json' }
+  });
+}
+
+// Conflict resolution: server wins
+function resolveConflicts(serverQuotes, localQuotes) {
+  // If any quote from server is not in local, add it
+  let updated = false;
+  serverQuotes.forEach(sq => {
+    if (!localQuotes.some(lq => lq.text === sq.text && lq.category === sq.category)) {
+      localQuotes.push(sq);
+      updated = true;
+    }
+  });
+  // Optionally, you could also remove local quotes not on server, but here we just merge
+  return updated;
+}
+
+// Notify user of sync/conflict
+function notifySync(message) {
+  let note = document.getElementById('syncNotification');
+  if (!note) {
+    note = document.createElement('div');
+    note.id = 'syncNotification';
+    note.style.background = '#ffeeba';
+    note.style.color = '#856404';
+    note.style.padding = '8px';
+    note.style.margin = '10px 0';
+    note.style.border = '1px solid #ffeeba';
+    note.style.borderRadius = '4px';
+    document.body.insertBefore(note, document.body.firstChild);
+  }
+  note.textContent = message;
+  setTimeout(() => { note.textContent = ''; }, 4000);
+}
+
+// Periodic sync with server
+async function syncWithServer() {
+  try {
+    const serverQuotes = await fetchQuotesFromServer();
+    const updated = resolveConflicts(serverQuotes, quotes);
+    if (updated) {
+      saveQuotes();
+      populateCategories();
+      filterQuotes();
+      notifySync('Quotes updated from server (conflict resolved: server wins).');
+    } else {
+      notifySync('Quotes are up to date with server.');
+    }
+  } catch (err) {
+    notifySync('Failed to sync with server.');
+  }
+}
+
+// Manual sync button (optional)
+function addManualSyncButton() {
+  if (!document.getElementById('syncBtn')) {
+    const btn = document.createElement('button');
+    btn.id = 'syncBtn';
+    btn.textContent = 'Sync with Server';
+    btn.style.margin = '10px';
+    btn.onclick = syncWithServer;
+    document.body.insertBefore(btn, document.getElementById('exportBtn'));
+  }
+}
+
+// Start periodic sync every 30 seconds
+setInterval(syncWithServer, 30000);
+
+// Add manual sync button and do initial sync on load
+window.addEventListener('DOMContentLoaded', function() {
+  addManualSyncButton();
+  syncWithServer();
+});
