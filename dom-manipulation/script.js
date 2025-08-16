@@ -22,8 +22,18 @@ function addQuote() {
     displayRandomQuote();
   }
 }
+function createAddQuoteForm() {
+  const formDiv = document.createElement('div');
+  formDiv.innerHTML = `
+    <input id="newQuoteText" type="text" placeholder="Enter a new quote" />
+    <input id="newQuoteCategory" type="text" placeholder="Enter quote category" />
+    <button id="addQuoteBtn">Add Quote</button>
+  `;
+  document.body.appendChild(formDiv);
+}
 
-document.getElementById('newQuote').addEventListener('click', showRandomQuote);
+
+document.getElementById('newQuote').addEventListener('click', displayRandomQuote);
 document.getElementById('addQuoteBtn').addEventListener('click', addQuote);
 
 // Show a quote on initial load
